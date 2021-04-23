@@ -56,7 +56,7 @@ SpoorO1 == IF sporen[4] # <<>>
 (*Bereken de volgende bestemming van (mogelijke) trein op spoor O2*)
 SpoorO2 == IF sporen[5] # <<>>
            THEN CASE sporen[5][2] = 1 -> bestemmingO2' = 6
-                  [] sporen[5][2] = 0 -> IF /\ (bestemmingC' < 3) /\ bestemmingW1' # 3 /\ bestemmingW2' # 3 /\ bestemmingO1' # 3 THEN /\ bestemmingO2' = 3 ELSE bestemmingO1' = 5
+                  [] sporen[5][2] = 0 -> IF /\ (bestemmingC' < 3) /\ bestemmingW1' # 3 /\ bestemmingW2' # 3 /\ bestemmingO1' # 3 THEN /\ bestemmingO2' = 3 ELSE bestemmingO2' = 5
                   [] OTHER -> bestemmingO2' = -1
            ELSE bestemmingO2' = -1
 
@@ -133,5 +133,5 @@ NotSolved == \/ treinCount < 10 \/ sporen # [n \in 1..5 |-> <<>>] \/ bufferW1 # 
 
 
 \* Modification History
-\* Last modified Fri Apr 23 19:21:06 CEST 2021 by jacob
+\* Last modified Fri Apr 23 19:33:18 CEST 2021 by jacob
 \* Created Thu Apr 22 11:45:14 CEST 2021 by jacob
