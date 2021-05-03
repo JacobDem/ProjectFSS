@@ -34,14 +34,12 @@ VARIABLES sporen,             (*Lijst die de sporen voorsteld en treinen kan bev
           verplaatst,         (*Geeft aan of de verplaatsingen zijn doorgevoerd. Wordt gebruikt om de buffers te laten
                               weten dat er treinen uit de buffers naar de sporen mag gebracht worden*)
                               
-          buffersGecontroleerd, (*Lijst van getallen die aangeven welke buffers al eventueel een trein op een spoor
+          buffersGecontroleerd (*Lijst van getallen die aangeven welke buffers al eventueel een trein op een spoor
                                hebben kunnen zetten*)
-          
-          treinTeller         (*Voor testen: geeft aan hoeveel treinen er in het systeem zitten*)
-
+ 
 CONSTANTS bufferGrootte       (*aantal treinen in buffers*)
 -----------------------------------------------------------------------------
-vars == <<sporen, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst, buffersGecontroleerd, treinTeller>>
+vars == <<sporen, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst, buffersGecontroleerd>>
 
 (* Initalisatie *)
 Init == /\ sporen =[n \in 1..10 |-> -1 ]
@@ -58,7 +56,6 @@ Init == /\ sporen =[n \in 1..10 |-> -1 ]
         /\ spoorVeranderd = [n \in 1..10 |-> 0]
         /\ verplaatst = FALSE
         /\ buffersGecontroleerd = [n \in 1..8 |-> 0]
-        /\ treinTeller = 0
         
 TypeInvariant == /\ \A n \in 1..10: sporen[n] \in (-1..1)
                  /\ \A n \in 1..4: bestemmingen[n] \in <<-1,0,n,5,6>>                (*Bestemming van treinen moet mogelijk zijn*)
@@ -111,7 +108,7 @@ SpoorC1 == /\ spoorVeranderd[5] = 0
                      [] OTHER -> /\ bestemmingen' = [bestemmingen EXCEPT ![5] = -1] /\ UNCHANGED COTopBezet /\ UNCHANGED COBottomBezet /\ UNCHANGED CWTopBezet /\ UNCHANGED CWBottomBezet /\ UNCHANGED C1Bezet
              ELSE /\ bestemmingen' = [bestemmingen EXCEPT ![5] = -1] /\ UNCHANGED COTopBezet /\ UNCHANGED COBottomBezet /\ UNCHANGED CWTopBezet /\ UNCHANGED CWBottomBezet /\ UNCHANGED C1Bezet
            /\ spoorVeranderd' = [spoorVeranderd EXCEPT ![5] = 1]
-           /\ UNCHANGED <<treinTeller, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, C2Bezet, magDoorrijden, verplaatst, buffersGecontroleerd>>
+           /\ UNCHANGED <<sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, C2Bezet, magDoorrijden, verplaatst, buffersGecontroleerd>>
 
 SpoorC2 == /\ spoorVeranderd[6] = 0
            /\ IF sporen[6] # -1
@@ -128,7 +125,7 @@ SpoorC2 == /\ spoorVeranderd[6] = 0
                      [] OTHER -> /\ bestemmingen' = [bestemmingen EXCEPT ![6] = -1] /\ UNCHANGED COTopBezet /\ UNCHANGED COBottomBezet /\ UNCHANGED CWTopBezet /\ UNCHANGED CWBottomBezet /\ UNCHANGED C2Bezet
              ELSE /\ bestemmingen' = [bestemmingen EXCEPT ![6] = -1] /\ UNCHANGED COTopBezet /\ UNCHANGED COBottomBezet /\ UNCHANGED CWTopBezet /\ UNCHANGED CWBottomBezet /\ UNCHANGED C2Bezet
            /\ spoorVeranderd' = [spoorVeranderd EXCEPT ![6] = 1]
-           /\ UNCHANGED <<treinTeller, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, C1Bezet, magDoorrijden, verplaatst, buffersGecontroleerd>>
+           /\ UNCHANGED <<sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, C1Bezet, magDoorrijden, verplaatst, buffersGecontroleerd>>
 
 (*Bereken de volgende bestemming van (mogelijke) trein op spoor W1*)
 SpoorW1 == /\ spoorVeranderd[1] = 0
@@ -141,7 +138,7 @@ SpoorW1 == /\ spoorVeranderd[1] = 0
               ELSE /\ bestemmingen' = [bestemmingen EXCEPT ![1] = -1] /\ UNCHANGED CWTopBezet /\ UNCHANGED CWBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
            /\ spoorVeranderd' = [spoorVeranderd EXCEPT ![1] = 1] 
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
-           /\ UNCHANGED <<treinTeller, buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet>>
+           /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet>>
                  
 (*Bereken de volgende bestemming van (mogelijke) trein op spoor W2*)
 SpoorW2 == /\ spoorVeranderd[2] = 0
@@ -154,7 +151,7 @@ SpoorW2 == /\ spoorVeranderd[2] = 0
               ELSE /\ bestemmingen' = [bestemmingen EXCEPT ![2] = -1] /\ UNCHANGED CWTopBezet /\ UNCHANGED CWBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
            /\ spoorVeranderd' = [spoorVeranderd EXCEPT ![2] = 1] 
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
-           /\ UNCHANGED <<treinTeller, buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet>>
+           /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet>>
 
 SpoorW3 == /\ spoorVeranderd[3] = 0
            /\ IF sporen[3] # -1
@@ -166,7 +163,7 @@ SpoorW3 == /\ spoorVeranderd[3] = 0
               ELSE /\ bestemmingen' = [bestemmingen EXCEPT ![3] = -1] /\ UNCHANGED CWTopBezet /\ UNCHANGED CWBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
            /\ spoorVeranderd' = [spoorVeranderd EXCEPT ![3] = 1] 
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
-           /\ UNCHANGED <<treinTeller, buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet>>
+           /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet>>
 
 SpoorW4 == /\ spoorVeranderd[4] = 0
            /\ IF sporen[4] # -1
@@ -178,7 +175,7 @@ SpoorW4 == /\ spoorVeranderd[4] = 0
               ELSE /\ bestemmingen' = [bestemmingen EXCEPT ![4] = -1] /\ UNCHANGED CWTopBezet /\ UNCHANGED CWBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
            /\ spoorVeranderd' = [spoorVeranderd EXCEPT ![4] = 1] 
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
-           /\ UNCHANGED <<treinTeller, buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet>>
+           /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet>>
 
 
 (*Bereken de volgende bestemming van (mogelijke) trein op spoor O1*)
@@ -192,7 +189,7 @@ SpoorO1 == /\ spoorVeranderd[7] = 0
               ELSE /\ bestemmingen' = [bestemmingen EXCEPT ![7] = -1] /\ UNCHANGED COTopBezet /\ UNCHANGED COBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
            /\ spoorVeranderd' = [spoorVeranderd EXCEPT ![7] = 1] 
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
-           /\ UNCHANGED <<treinTeller, buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, CWTopBezet, CWBottomBezet>>           
+           /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, CWTopBezet, CWBottomBezet>>           
 
 SpoorO2 == /\ spoorVeranderd[8] = 0
            /\ IF sporen[8] # -1
@@ -204,7 +201,7 @@ SpoorO2 == /\ spoorVeranderd[8] = 0
               ELSE /\ bestemmingen' = [bestemmingen EXCEPT ![8] = -1] /\ UNCHANGED COTopBezet /\ UNCHANGED COBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
            /\ spoorVeranderd' = [spoorVeranderd EXCEPT ![8] = 1] 
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
-           /\ UNCHANGED <<treinTeller, buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, CWTopBezet, CWBottomBezet>>           
+           /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, CWTopBezet, CWBottomBezet>>           
 
 SpoorO3 == /\ spoorVeranderd[9] = 0
            /\ IF sporen[9] # -1
@@ -216,7 +213,7 @@ SpoorO3 == /\ spoorVeranderd[9] = 0
               ELSE /\ bestemmingen' = [bestemmingen EXCEPT ![9] = -1] /\ UNCHANGED COTopBezet /\ UNCHANGED COBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
            /\ spoorVeranderd' = [spoorVeranderd EXCEPT ![9] = 1] 
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
-           /\ UNCHANGED <<treinTeller, buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, CWTopBezet, CWBottomBezet>>           
+           /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, CWTopBezet, CWBottomBezet>>           
 
 SpoorO4 == /\ spoorVeranderd[10] = 0
            /\ IF sporen[10] # -1
@@ -228,7 +225,7 @@ SpoorO4 == /\ spoorVeranderd[10] = 0
               ELSE /\ bestemmingen' = [bestemmingen EXCEPT ![10] = -1] /\ UNCHANGED COTopBezet /\ UNCHANGED COBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
            /\ spoorVeranderd' = [spoorVeranderd EXCEPT ![10] = 1] 
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
-           /\ UNCHANGED <<treinTeller, buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, CWTopBezet, CWBottomBezet>>           
+           /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, CWTopBezet, CWBottomBezet>>           
 
 (*Voer de verplaatsingen door*)
 Verplaatsing == /\ IF \E n \in 1..10 : bestemmingen[n] = 1 THEN \E n \in 1..10 : /\ bestemmingen[n] = 1 /\ newW1' = sporen[n] ELSE newW1' = -1
@@ -245,7 +242,7 @@ Verplaatsing == /\ IF \E n \in 1..10 : bestemmingen[n] = 1 THEN \E n \in 1..10 :
                 /\ spoorVeranderd' = [n \in 1..10 |-> 0]
                 /\ (/\ CWTopBezet' = FALSE /\ CWBottomBezet' = FALSE /\ COTopBezet' = FALSE /\ COBottomBezet' = FALSE /\ C1Bezet' = FALSE /\ C2Bezet' = FALSE /\ magDoorrijden' = FALSE)
                 /\ verplaatst' = TRUE
-                /\ UNCHANGED <<treinTeller, buffersGecontroleerd, bestemmingen, bufferW, bufferO>>
+                /\ UNCHANGED <<buffersGecontroleerd, bestemmingen, bufferW, bufferO>>
       
       
       
@@ -255,13 +252,11 @@ Verplaatsing == /\ IF \E n \in 1..10 : bestemmingen[n] = 1 THEN \E n \in 1..10 :
 (*Nieuwe trein komt toe in buffer W1 (als de buffer niet vol zit)*)          
 aankomstW == /\ bufferW < bufferGrootte
              /\ bufferW' = bufferW + 1
-             /\ treinTeller' = treinTeller + 1
              /\ UNCHANGED <<sporen, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst, buffersGecontroleerd>>
             
 (*Nieuwe trein komt toe in buffer O1 (als de buffer niet vol zit)*)          
 aankomstO == /\ bufferO < bufferGrootte
              /\ bufferO' = bufferO + 1
-             /\ treinTeller' = treinTeller + 1
              /\ UNCHANGED <<sporen, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst, buffersGecontroleerd>>
           
 
@@ -281,7 +276,7 @@ bufferWNaarSpoorW1 == /\ buffersGecontroleerd[1] # 1
                          THEN /\ sporen' = [sporen EXCEPT ![1] = 1]
                               /\ bufferW' = bufferW - 1 
                          ELSE UNCHANGED <<sporen, bufferW>>
-                      /\ UNCHANGED <<treinTeller, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
+                      /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
 
 bufferWNaarSpoorW2 == /\ buffersGecontroleerd[2] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![2] = 1]
@@ -294,7 +289,7 @@ bufferWNaarSpoorW2 == /\ buffersGecontroleerd[2] # 1
                          THEN /\ sporen' = [sporen EXCEPT ![2] = 1]
                               /\ bufferW' = bufferW - 1
                          ELSE UNCHANGED <<sporen, bufferW>>
-                      /\ UNCHANGED <<treinTeller, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
+                      /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
    
 bufferWNaarSpoorW3 == /\ buffersGecontroleerd[3] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![3] = 1]
@@ -307,7 +302,7 @@ bufferWNaarSpoorW3 == /\ buffersGecontroleerd[3] # 1
                          THEN /\ sporen' = [sporen EXCEPT ![3] = 1]
                               /\ bufferW' = bufferW - 1
                          ELSE UNCHANGED <<sporen, bufferW>>
-                      /\ UNCHANGED <<treinTeller, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
+                      /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
            
 bufferWNaarSpoorW4 == /\ buffersGecontroleerd[4] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![4] = 1]
@@ -320,7 +315,7 @@ bufferWNaarSpoorW4 == /\ buffersGecontroleerd[4] # 1
                          THEN /\ sporen' = [sporen EXCEPT ![4] = 1]
                               /\ bufferW' = bufferW - 1
                          ELSE UNCHANGED <<sporen, bufferW>>
-                      /\ UNCHANGED <<treinTeller, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
+                      /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
 
 bufferONaarSpoorO1 == /\ buffersGecontroleerd[5] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![5] = 1]
@@ -333,7 +328,7 @@ bufferONaarSpoorO1 == /\ buffersGecontroleerd[5] # 1
                          THEN /\ sporen' = [sporen EXCEPT ![7] = 0]
                               /\ bufferO' = bufferO - 1
                          ELSE UNCHANGED <<sporen, bufferO>>
-                      /\ UNCHANGED <<treinTeller, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
+                      /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
 
 bufferONaarSpoorO2 == /\ buffersGecontroleerd[6] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![6] = 1]
@@ -346,7 +341,7 @@ bufferONaarSpoorO2 == /\ buffersGecontroleerd[6] # 1
                          THEN /\ sporen' = [sporen EXCEPT ![8] = 0]
                               /\ bufferO' = bufferO - 1
                          ELSE UNCHANGED <<sporen, bufferO>>
-                      /\ UNCHANGED <<treinTeller, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
+                      /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
 
 bufferONaarSpoorO3 == /\ buffersGecontroleerd[7] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![7] = 1]
@@ -359,7 +354,7 @@ bufferONaarSpoorO3 == /\ buffersGecontroleerd[7] # 1
                          THEN /\ sporen' = [sporen EXCEPT ![9] = 0]
                               /\ bufferO' = bufferO - 1
                          ELSE UNCHANGED <<sporen, bufferO>>
-                      /\ UNCHANGED <<treinTeller, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
+                      /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
 
 bufferONaarSpoorO4 == /\ buffersGecontroleerd[8] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![8] = 1]
@@ -372,7 +367,7 @@ bufferONaarSpoorO4 == /\ buffersGecontroleerd[8] # 1
                          THEN /\ sporen' = [sporen EXCEPT ![10] = 0]
                               /\ bufferO' = bufferO - 1
                          ELSE UNCHANGED <<sporen, bufferO>>
-                      /\ UNCHANGED <<treinTeller, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>> 
+                      /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>> 
                     
 ----------------------(*HOOFDFUNCTIES*)-----------------------------
                       
@@ -410,7 +405,7 @@ Next == \/ (/\ ~verplaatst /\ ~magDoorrijden /\ doorrijden)
         \/ (/\ (\A n \in 1..8: buffersGecontroleerd[n] = 1)
             /\ verplaatst' = FALSE
             /\ buffersGecontroleerd' = [n \in 1..8 |-> 0]
-            /\ UNCHANGED <<treinTeller, sporen, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd >>)
+            /\ UNCHANGED <<sporen, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd >>)
 
 VeiligheidSpec == IF magDoorrijden = TRUE \*Veiligheid moet enkel gecontroleerd worden wanneer de treinen op het punt staan van te verplaatsen
                   THEN /\ \A i,j \in 1..10: \/ i = j                           \*Geen meerdere treinen naar eenzelfde spoor
@@ -470,8 +465,6 @@ DeadlockSpec == IF magDoorrijden = TRUE THEN \E n \in 1..10 : bestemmingen[n] # 
                                                                                            zit het systeem in een deadlock*)
                                             
 Spec == Init/\[][Next]_vars
-
-NotSolved == treinTeller < 10
 --------------------------------------------------------------------------------
 THEOREM Spec => []TypeInvariant
 =============================================================================
