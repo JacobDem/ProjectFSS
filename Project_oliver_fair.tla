@@ -1,14 +1,14 @@
  ------------------------------ MODULE Project_oliver_fair ------------------------------
 EXTENDS Integers, Sequences
 
-VARIABLES sporen,             (*Lijst die de sporen voorsteld en treinen kan bevatten. Volgorde: spoor W1, W2, C, O1, O2.
+VARIABLES sporen,             (*Lijst die de sporen voorsteld en treinen kan bevatten. Volgorde: spoor W1, W2, W3, W4,C, O1, O2, O3, O4.
                               Treinen worden weergegeven als <<richting>>. Waarbij richting = 1 W->O is 
                               en 0 O->W is. -1 is nog geen bestemming.*)
                               
           bestemmingen,       (*Lijst met lengte = aantal sporen. Per spoor staat hier een getal dat voorstelt naar waar
-                              de volgende trein KAN gaan. 1 is W1, 2 is W2, 3 is C, 4 is O1, 5 is O2. -1 is de waarde
+                              de volgende trein KAN gaan. 1 is W1, 2 is W2, 3 is W3, 4 is W4, 5 is C1, 6 is C2, 7 is O1, 8 is O2, 9 is O3 en 10 is O4. -1 is de waarde
                               die zegt dat er geen trein aanwezig is op dit perron. 0 is de waarde die wordt gebruikt om naar 
-                              westen te rijden, 6 om naar het oosten te rijden (buiten ons netwerk) *) 
+                              westen te rijden, 11 om naar het oosten te rijden (buiten ons netwerk) *) 
                                         
           newW1, newW2,      (*Elementen die treinen bevatten. Wordt gebruikt om de nieuwe situatie in op te slaan alvorens *)
           newW3, newW4,      (*de situatie uit te voeren*)
@@ -17,7 +17,7 @@ VARIABLES sporen,             (*Lijst die de sporen voorsteld en treinen kan bev
           newO3, newO4,          
 
                    
-          bufferW,               (*Buffers voor inkomende treinen, die wachten om perron W1, W2, O1 en O2 op te rijden*) 
+          bufferW,               (*Buffers voor inkomende treinen, die wachten om perron W1, W2, W3, W4, O1, O2, O3 en O4 op te rijden*) 
           bufferO,
                     
           CWTopBezet,            (*Geeft aan of de verbinding C -> O reeds wordt gebruikt in de huidige cyclus*)
@@ -89,9 +89,9 @@ spoorO4Safe == IF sporen[10] # -1 THEN sporen[10] = 1 ELSE TRUE
 ----------------------(*VERPLAATSING VAN DE TREINEN*)-----------------------------
 
 
-(*Bereken de volgende bestemming van (mogelijke) trein op spoor C. 
-Als naar oosten, en O1 of O2 is vrij, bestemming is een van deze (prioriteit O1). Anders blijf staan.
-Als naar westen, en W1 of W2 is vrij, bestemming is een van deze. Anders blijf staan.
+(*Bereken de volgende bestemming van (mogelijke) trein op spoor C1. 
+Als naar oosten, en O1,O2, O3 of O4 is vrij, bestemming is een van deze (prioriteit O1). Anders blijf staan.
+Als naar westen, en W1, W2, W3 of W4 is vrij, bestemming is een van deze. Anders blijf staan.
 Indien geen trein, geen bestemming opgeven.*)
 SpoorC1 == /\ spoorVeranderd[5] = 0
            /\ IF sporen[5] # -1
@@ -110,6 +110,10 @@ SpoorC1 == /\ spoorVeranderd[5] = 0
            /\ spoorVeranderd' = [spoorVeranderd EXCEPT ![5] = 1]
            /\ UNCHANGED <<sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, C2Bezet, magDoorrijden, verplaatst, buffersGecontroleerd>>
 
+(*Bereken de volgende bestemming van (mogelijke) trein op spoor C2. 
+Als naar oosten, en O1,O2, O3 of O4 is vrij, bestemming is een van deze (prioriteit O1). Anders blijf staan.
+Als naar westen, en W1, W2, W3 of W4 is vrij, bestemming is een van deze. Anders blijf staan.
+Indien geen trein, geen bestemming opgeven.*)
 SpoorC2 == /\ spoorVeranderd[6] = 0
            /\ IF sporen[6] # -1
               THEN CASE sporen[6] = 1 -> CASE /\ (\/ sporen[9] = -1 \/ sporen[9] = 1) /\ COBottomBezet = FALSE -> /\ bestemmingen' = [bestemmingen EXCEPT ![6] = 9] /\ COBottomBezet' = TRUE /\ UNCHANGED COTopBezet /\ UNCHANGED CWTopBezet /\ UNCHANGED CWBottomBezet /\ UNCHANGED C2Bezet
@@ -153,6 +157,7 @@ SpoorW2 == /\ spoorVeranderd[2] = 0
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
            /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet>>
 
+(*Bereken de volgende bestemming van (mogelijke) trein op spoor W3*)
 SpoorW3 == /\ spoorVeranderd[3] = 0
            /\ IF sporen[3] # -1
               THEN CASE sporen[3] = 0 -> /\ bestemmingen' = [bestemmingen EXCEPT ![3] = 0] /\ UNCHANGED CWTopBezet /\ UNCHANGED CWBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
@@ -165,6 +170,7 @@ SpoorW3 == /\ spoorVeranderd[3] = 0
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
            /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, COTopBezet, COBottomBezet>>
 
+(*Bereken de volgende bestemming van (mogelijke) trein op spoor W4*)
 SpoorW4 == /\ spoorVeranderd[4] = 0
            /\ IF sporen[4] # -1
               THEN CASE sporen[4] = 0 -> /\ bestemmingen' = [bestemmingen EXCEPT ![4] = 0] /\ UNCHANGED CWTopBezet /\ UNCHANGED CWBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
@@ -191,6 +197,7 @@ SpoorO1 == /\ spoorVeranderd[7] = 0
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
            /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, CWTopBezet, CWBottomBezet>>           
 
+(*Bereken de volgende bestemming van (mogelijke) trein op spoor O2*)
 SpoorO2 == /\ spoorVeranderd[8] = 0
            /\ IF sporen[8] # -1
               THEN CASE sporen[8] = 1 -> /\ bestemmingen' = [bestemmingen EXCEPT ![8] = 11] /\ UNCHANGED COTopBezet /\ UNCHANGED COBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
@@ -203,6 +210,7 @@ SpoorO2 == /\ spoorVeranderd[8] = 0
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
            /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, CWTopBezet, CWBottomBezet>>           
 
+(*Bereken de volgende bestemming van (mogelijke) trein op spoor O3*)
 SpoorO3 == /\ spoorVeranderd[9] = 0
            /\ IF sporen[9] # -1
               THEN CASE sporen[9] = 1 -> /\ bestemmingen' = [bestemmingen EXCEPT ![9] = 11] /\ UNCHANGED COTopBezet /\ UNCHANGED COBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
@@ -215,6 +223,7 @@ SpoorO3 == /\ spoorVeranderd[9] = 0
            /\ IF \A n \in 1..10 : spoorVeranderd'[n] = 1 THEN magDoorrijden' = TRUE ELSE UNCHANGED magDoorrijden
            /\ UNCHANGED <<buffersGecontroleerd, verplaatst, sporen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, bufferO, CWTopBezet, CWBottomBezet>>           
 
+(*Bereken de volgende bestemming van (mogelijke) trein op spoor O4*)
 SpoorO4 == /\ spoorVeranderd[10] = 0
            /\ IF sporen[10] # -1
               THEN CASE sporen[10] = 1 -> /\ bestemmingen' = [bestemmingen EXCEPT ![10] = 11] /\ UNCHANGED COTopBezet /\ UNCHANGED COBottomBezet /\ UNCHANGED C1Bezet /\ UNCHANGED C2Bezet
@@ -249,12 +258,12 @@ Verplaatsing == /\ IF \E n \in 1..10 : bestemmingen[n] = 1 THEN \E n \in 1..10 :
 ----------------------(*AANKOMST NIEUWE TREINEN*)-----------------------------
       
       
-(*Nieuwe trein komt toe in buffer W1 (als de buffer niet vol zit)*)          
+(*Nieuwe trein komt toe in buffer W (als de buffer niet vol zit)*)          
 aankomstW == /\ bufferW < bufferGrootte
              /\ bufferW' = bufferW + 1
              /\ UNCHANGED <<sporen, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst, buffersGecontroleerd>>
             
-(*Nieuwe trein komt toe in buffer O1 (als de buffer niet vol zit)*)          
+(*Nieuwe trein komt toe in buffer O (als de buffer niet vol zit)*)          
 aankomstO == /\ bufferO < bufferGrootte
              /\ bufferO' = bufferO + 1
              /\ UNCHANGED <<sporen, bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst, buffersGecontroleerd>>
@@ -264,7 +273,7 @@ aankomstO == /\ bufferO < bufferGrootte
 ----------------------(*WERKING VAN DE BUFFERS*)-----------------------------
 
 
-(*Haal een trein uit buffer W1 indien spoor W1 vrij is en dit geen deadlock kan veroorzaken*)
+(*Haal een trein uit buffer W indien spoor W1 vrij is en dit geen deadlock kan veroorzaken*)
 bufferWNaarSpoorW1 == /\ buffersGecontroleerd[1] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![1] = 1]
                       /\ IF /\ bufferW # 0 
@@ -278,6 +287,7 @@ bufferWNaarSpoorW1 == /\ buffersGecontroleerd[1] # 1
                          ELSE UNCHANGED <<sporen, bufferW>>
                       /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
 
+(*Haal een trein uit buffer W indien spoor W2 vrij is en dit geen deadlock kan veroorzaken*)
 bufferWNaarSpoorW2 == /\ buffersGecontroleerd[2] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![2] = 1]
                       /\ IF /\ bufferW # 0 
@@ -290,7 +300,8 @@ bufferWNaarSpoorW2 == /\ buffersGecontroleerd[2] # 1
                               /\ bufferW' = bufferW - 1
                          ELSE UNCHANGED <<sporen, bufferW>>
                       /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
-   
+
+(*Haal een trein uit buffer W indien spoor W3 vrij is en dit geen deadlock kan veroorzaken*)
 bufferWNaarSpoorW3 == /\ buffersGecontroleerd[3] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![3] = 1]
                       /\ IF /\ bufferW # 0 
@@ -303,7 +314,8 @@ bufferWNaarSpoorW3 == /\ buffersGecontroleerd[3] # 1
                               /\ bufferW' = bufferW - 1
                          ELSE UNCHANGED <<sporen, bufferW>>
                       /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
-           
+ 
+(*Haal een trein uit buffer W indien spoor W4 vrij is en dit geen deadlock kan veroorzaken*)
 bufferWNaarSpoorW4 == /\ buffersGecontroleerd[4] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![4] = 1]
                       /\ IF /\ bufferW # 0 
@@ -317,6 +329,7 @@ bufferWNaarSpoorW4 == /\ buffersGecontroleerd[4] # 1
                          ELSE UNCHANGED <<sporen, bufferW>>
                       /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferO, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
 
+(*Haal een trein uit buffer O indien spoor O1 vrij is en dit geen deadlock kan veroorzaken*)
 bufferONaarSpoorO1 == /\ buffersGecontroleerd[5] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![5] = 1]
                       /\ IF /\ bufferO # 0 
@@ -330,6 +343,7 @@ bufferONaarSpoorO1 == /\ buffersGecontroleerd[5] # 1
                          ELSE UNCHANGED <<sporen, bufferO>>
                       /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
 
+(*Haal een trein uit buffer O indien spoor O2 vrij is en dit geen deadlock kan veroorzaken*)
 bufferONaarSpoorO2 == /\ buffersGecontroleerd[6] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![6] = 1]
                       /\ IF /\ bufferO # 0 
@@ -343,6 +357,7 @@ bufferONaarSpoorO2 == /\ buffersGecontroleerd[6] # 1
                          ELSE UNCHANGED <<sporen, bufferO>>
                       /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
 
+(*Haal een trein uit buffer O indien spoor O3 vrij is en dit geen deadlock kan veroorzaken*)
 bufferONaarSpoorO3 == /\ buffersGecontroleerd[7] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![7] = 1]
                       /\ IF /\ bufferO # 0 
@@ -356,6 +371,7 @@ bufferONaarSpoorO3 == /\ buffersGecontroleerd[7] # 1
                          ELSE UNCHANGED <<sporen, bufferO>>
                       /\ UNCHANGED <<bestemmingen, newW1, newW2, newW3, newW4, newC1, newC2, newO1, newO2, newO3, newO4, bufferW, COTopBezet, COBottomBezet, CWTopBezet, CWBottomBezet, C1Bezet, C2Bezet, magDoorrijden, spoorVeranderd, verplaatst>>
 
+(*Haal een trein uit buffer O indien spoor O4 vrij is en dit geen deadlock kan veroorzaken*)
 bufferONaarSpoorO4 == /\ buffersGecontroleerd[8] # 1
                       /\ buffersGecontroleerd' = [buffersGecontroleerd EXCEPT ![8] = 1]
                       /\ IF /\ bufferO # 0 
